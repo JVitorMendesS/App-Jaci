@@ -86,7 +86,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </p>
           )}
 
-          <div className="flex justify-between items-center mt-auto">
+          <div className="mt-auto flex flex-col gap-2">
             {/* Preço com unidade base do produto */}
             <span className="text-xl font-bold text-jaci-blue">
               R$ {product.price.toFixed(2).replace(".", ",")} / {unitLabel}
@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
             <button
               onClick={handleAddToCart}
-              className="flex items-center space-x-2 bg-jaci-red text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300"
+              className="w-full flex items-center justify-center space-x-2 bg-jaci-red text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300"
               aria-label={`Adicionar ${product.name} ao carrinho`}
             >
               <PlusCircleIcon />
