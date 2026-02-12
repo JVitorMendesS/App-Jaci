@@ -13,7 +13,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Rótulo de unidade exibido no card (preço base do produto)
   const unitLabel = product.unit_type === "kg" ? "kg" : "un";
 
-  // Modal states (apenas para produtos de peso)
+  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [unitChoice, setUnitChoice] = useState<"unit" | "kg">("kg");
   const [qty, setQty] = useState<string>("1");
@@ -23,8 +23,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [unitChoice]);
 
   const openModal = () => {
-    // padrão: se o produto é de peso, começa em kg
-    setUnitChoice("kg");
+    // Se for kg, abre em kg. Se for unidade, abre em unidade.
+    setUnitChoice(product.unit_type === "kg" ? "kg" : "unit");
     setQty("1");
     setIsModalOpen(true);
   };
@@ -52,14 +52,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleAddToCart = () => {
-    // 🔹 Se for vendido em KG (cadastro), agora pergunta: unidade ou kg + quantidade
-    if (product.unit_type === "kg") {
-      openModal();
-      return;
-    }
-
-    // 🔹 Se for vendido por unidade, adiciona 1 direto
-    addToCart(product, 1, "unit");
+    // Agora SEMPRE abre o modal, até para itens de unidade.
+    openModal();
   };
 
   return (
@@ -86,8 +80,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </p>
           )}
 
+          {/* Preço + Botão (mobile-friendly) */}
           <div className="mt-auto flex flex-col gap-2">
-            {/* Preço com unidade base do produto */}
             <span className="text-xl font-bold text-jaci-blue">
               R$ {product.price.toFixed(2).replace(".", ",")} / {unitLabel}
             </span>
@@ -104,7 +98,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </div>
 
-      {/* Modal: somente para produtos cadastrados como kg */}
+      {/* Modal: agora para TODOS os produtos */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg">
@@ -119,36 +113,46 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Deseja comprar por <b>unidade</b> ou por <b>quilo</b>?
-            </p>
+            {/* Se for KG, mostra escolha Unidade/Quilo */}
+            {product.unit_type === "kg" ? (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  Deseja comprar por <b>unidade</b> ou por <b>quilo</b>?
+                </p>
 
-            <div className="flex gap-2 mb-4">
-              <button
-                className={`flex-1 rounded-md border px-3 py-2 ${
-                  unitChoice === "unit" ? "bg-gray-100 font-semibold" : ""
-                }`}
-                onClick={() => {
-                  setUnitChoice("unit");
-                  // sugere inteiro se o usuário trocar pra unidade
-                  if (qty.includes(".") || qty.includes(",")) setQty("1");
-                }}
-              >
-                Unidade
-              </button>
+                <div className="flex gap-2 mb-4">
+                  <button
+                    className={`flex-1 rounded-md border px-3 py-2 ${
+                      unitChoice === "unit" ? "bg-gray-100 font-semibold" : ""
+                    }`}
+                    onClick={() => {
+                      setUnitChoice("unit");
+                      // sugere inteiro se o usuário trocar pra unidade
+                      if (qty.includes(".") || qty.includes(",")) setQty("1");
+                    }}
+                  >
+                    Unidade
+                  </button>
 
-              <button
-                className={`flex-1 rounded-md border px-3 py-2 ${
-                  unitChoice === "kg" ? "bg-gray-100 font-semibold" : ""
-                }`}
-                onClick={() => setUnitChoice("kg")}
-              >
-                Quilo
-              </button>
-            </div>
+                  <button
+                    className={`flex-1 rounded-md border px-3 py-2 ${
+                      unitChoice === "kg" ? "bg-gray-100 font-semibold" : ""
+                    }`}
+                    onClick={() => setUnitChoice("kg")}
+                  >
+                    Quilo
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Se for UN, apenas pede quantidade
+              <p className="text-sm text-gray-600 mb-4">
+                Informe a quantidade desejada.
+              </p>
+            )}
 
             <label className="block text-sm font-medium mb-1 text-jaci-dark">
-              Quantidade ({qtyHint})
+              Quantidade ({unitChoice === "kg" ? "kg" : "un"})
             </label>
 
             <input
